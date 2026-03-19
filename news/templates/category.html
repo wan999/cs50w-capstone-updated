@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<body>
+    <div class="container">
+        <header class="blog-header py-3 mb-3">
+            <div class="row flex-nowrap justify-content-between align-items-center">
+            <div class="col-4 pt-1">
+                    <a class="text-muted" href="{% url 'index' %}">Back to Homepage</a>
+            </div>
+            <div class="col-4 text-center">
+                <a class="blog-header-logo text-dark" href="{% url 'index' %}">The Newer Times</a>
+            </div>
+            <div class="col-4 d-flex justify-content-end align-items-center">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-sm btn-secondary" href="{% url 'logout' %}">Log out</a>
+                {% endif %}
+            </div>
+            </div>
+        </header>
+    <div>
+    <h2 class="mb-5">{{ category }}</h2>
+
+    <div class="row" style="margin-bottom: 100px;">
+        {% if articles %}
+            {% for article in articles %}
+            <div class="col-md-6">
+                <div class="card flex-md-row mb-4 box-shadow h-md-250">
+                    <div class="card-body d-flex flex-column align-items-start" style="overflow: hidden;">
+                    <strong class="d-inline-block mb-2 text-success">{{ article.category }}</strong>
+                    <h3 class="mb-0">
+                        <a class="text-dark" href="{% url 'single_post' article.article_title %}">{{ article.article_title }}</a>
+                    </h3>
+                    <div class="mb-1 text-muted">{{ article.timestamp|date:"F j" }}</div>
+                    <p class="card-text mb-auto">{{ article.article_content|slice:":35" }} ... </p>
+                    <a href="{% url 'single_post' article.article_title %}">Continue reading</a>
+                    </div>
+                    <img class="card-img-right flex-auto d-md-block" alt="{{ article.article_title }}" src="{{ article.banner_image }}" style="max-height:400px; width: auto;">
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-6">
+                <div class="card flex-md-row mb-4 box-shadow">
+                    <div class="card-body d-flex flex-column align-items-start">
+                        <p class="d-inline-block card-text">No Published Articles In {{ category }}.</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+
+{% endblock %}

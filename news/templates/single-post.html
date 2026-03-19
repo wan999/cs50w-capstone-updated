@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+
+  <div class="container">
+      <header class="blog-header py-3 mb-3">
+          <div class="row flex-nowrap justify-content-between align-items-center">
+          <div class="col-4 pt-1">
+                  <a class="text-muted" href="{% url 'index' %}">Back to Homepage</a>
+          </div>
+          <div class="col-4 text-center">
+              <a class="blog-header-logo text-dark" href="{% url 'index' %}">The Newer Times</a>
+          </div>
+          <div class="col-4 d-flex justify-content-end align-items-center">
+              {% if user.is_authenticated %}
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'logout' %}">Log out</a>
+              {% endif %}
+          </div>
+          </div>
+      </header>
+    </div>
+
+    <div class="banner">
+      <div class="w-100" style="height: 300px; background-position: center; background-repeat: repeat-x; background-size: contain; background-position: center; background-image: url('{{ article.banner_image }}')"></div>
+    </div>
+
+    <div class="container">
+      <h3 class="pb-3 mb-4 font-italic border-bottom mt-2">
+        {{ article.category }}
+      </h3>
+      <div class="row mb-5">
+        <div class="col-md-8 blog-main">
+          <div class="blog-post mb-2">
+            <h2 class="blog-post-title">{{ article.article_title }}</h2>
+            <a class="btn btn-sm btn-outline-secondary mt-2 mb-2" href="{% url 'add_to_favorites' article.id %}">Favorite Article</a>
+            <p class="blog-post-meta"> {{ article.timestamp }} <a href="{% url 'profile' article.author.username %}">{{ article.author.first_name }} {{ article.author.last_name }}</a></p>
+            <p>{{ article.article_content }}</p>
+          </div>
+
+          <hr>
+
+          <div class="col-12">
+            {% if comments %}
+              {% for comment in comments %}
+                <div class="card mb-4 box-shadow">
+                    <div id="comment_card" class="card-body d-flex flex-column align-items-start">
+                        <p id="comment_content" class="d-inline-block card-text">{{ comment.content }}</p>
+                        <p id="comment_user" class="d-inline-block card-text text-muted">{{ comment.user }} at {{ comment.timestamp }}</p>
+                    </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="card flex-md-row mb-4 box-shadow">
+                  <div id="comment_card" class="card-body d-flex flex-column align-items-start">
+                      <p id="comment_content" class="d-inline-block card-text">No Published Comments.</p>
+                  </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <h2>Add Comment</h2>
+
+          {% if user.is_authenticated %}
+            <form class="mt-2" id="comment_form" style="margin-bottom: 100px;" action="{% url 'add_comment' article.id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label for="Name" class="form-label">Username</label>
+                  <input class="form-control" type="text" name="username" id="username" value="{{ user.username }}">
+              </div>
+              <div class="form-group">
+                  <input class="form-control" type="hidden" name="article_id" id="article_id" value="{{ article.id }}">
+              </div>
+              <div class="form-group">
+                  <label for="article" class="form-label">Article Text</label>
+                  <textarea class="form-control" id="comment" name="comment" rows="10">Insert Comment Here ...</textarea>
+              </div>
+              <input class="btn btn-primary" type="submit" value="Comment">
+            </form>
+          {% else %}
+            <form class="mt-2" id="comment_form" style="margin-bottom: 100px;" action="{% url 'add_comment' article.id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label for="Name" class="form-label">Username</label>
+                  <input class="form-control" type="text" name="username" id="username" placeholder="Username" maxlength="64">
+              </div>
+              <div class="form-group">
+                  <input class="form-control" type="hidden" name="article_id" id="article_id" value="{{ article.id }}">
+              </div>
+              <div class="form-group">
+                  <label for="article" class="form-label">Article Text</label>
+                  <textarea class="form-control" id="comment" name="comment" rows="10">Insert Comment Here ...</textarea>
+              </div>
+              <input class="btn btn-primary" type="submit" value="Comment">
+            </form>
+          {% endif %}
+          
+        </div><!-- /.blog-main -->
+        <div class="col-md-4" style="margin-bottom: 125px;">
+          <h4 class="font-italic">Archives</h4>
+          <ol class="list-unstyled mb-0">
+            {% if other_articles %}
+              {% for i in other_articles %}
+                <li><a href="{% url 'single_post' i.article_title %}">{{ i.article_title }}</a></li>
+              {% endfor %}
+            {% endif %}
+          </ol>
+        </div>
+      </div><!-- /.row -->
+    </div>
+
+{% endblock %}
