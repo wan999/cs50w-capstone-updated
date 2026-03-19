@@ -20,37 +20,39 @@
             </div>
         </header>
         <div>
-            <h2 class="mb-5">Staff Profile</h2>
+            <h2 class="mb-5">User Profile</h2>
             <div class="row" style="margin-bottom: 200px;">
                 <div class="col-md-8">
-                    <h3>Published Articles</h3>
-                    {% if articles %}
-                        {% for article in articles %}
-                            <div class="card flex-md-row mb-4 box-shadow h-md-250">
-                                <div class="card-body d-flex flex-column align-items-start">
-                                {% if user_profile.username == request.user.username %}
-                                    <form action="{% url 'delete_article' article.article_title %}" method="post">
-                                        {% csrf_token %}
-                                        <input type="submit" class="btn btn-sm btn-outline-danger mb-3" value="DELETE">
-                                    </form>
-                                {% endif %}
-                                <strong class="d-inline-block mb-2 text-primary">{{ article.category }}</strong>
-                                <h3 class="mb-0">
-                                    <a class="text-dark" href="{% url 'single_post' article.article_title %}">{{ article.article_title }}</a>
-                                </h3>
-                                <div class="mb-1 text-muted">{{ article.timestamp }}</div>
-                                <p class="card-text mb-auto">{{ article.article_content|slice:":35" }} ...</p>
-                                <a href="{% url 'single_post' article.article_title %}">Continue reading</a>
+                    {% if check_editor == True %}
+                        <h3>Published Articles</h3>
+                        {% if articles %}
+                            {% for article in articles %}
+                                <div class="card flex-md-row mb-4 box-shadow h-md-250">
+                                    <div class="card-body d-flex flex-column align-items-start">
+                                    {% if user_profile.username == request.user.username %}
+                                        <form action="{% url 'delete_article' article.article_title %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="submit" class="btn btn-sm btn-outline-danger mb-3" value="DELETE">
+                                        </form>
+                                    {% endif %}
+                                    <strong class="d-inline-block mb-2 text-primary">{{ article.category }}</strong>
+                                    <h3 class="mb-0">
+                                        <a class="text-dark" href="{% url 'single_post' article.article_title %}">{{ article.article_title }}</a>
+                                    </h3>
+                                    <div class="mb-1 text-muted">{{ article.timestamp }}</div>
+                                    <p class="card-text mb-auto">{{ article.article_content|slice:":35" }} ...</p>
+                                    <a href="{% url 'single_post' article.article_title %}">Continue reading</a>
+                                    </div>
+                                    <img class="card-img-right flex-auto d-md-block" src="{{ article.banner_image }}" alt="{{ article_title }}" style="max-height:400px; width: auto;">
                                 </div>
-                                <img class="card-img-right flex-auto d-md-block" src="{{ article.banner_image }}" alt="{{ article_title }}" style="max-height:400px; width: auto;">
-                            </div>
-                        {% endfor %}
-                        {% else %}
-                            <div class="card flex-md-row mb-4 box-shadow">
-                                <div class="card-body d-flex flex-column align-items-start">
-                                    <p class="d-inline-block card-text">User Has No Published Articles Yet.</p>
+                            {% endfor %}
+                            {% else %}
+                                <div class="card flex-md-row mb-4 box-shadow">
+                                    <div class="card-body d-flex flex-column align-items-start">
+                                        <p class="d-inline-block card-text">User Has No Published Articles Yet.</p>
+                                    </div>
                                 </div>
-                            </div>
+                        {% endif %}
                     {% endif %}
                     <h3>Favorited Articles</h3>
                     {% if favorites %}

@@ -4,11 +4,13 @@ from django.urls import reverse
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from PIL import Image
 
 import json
 
-from .models import User, Article, Category, ImageForm, Avatar, Comment, Favorite
+from .models import User, Article, Category, ImageForm, Avatar, Comment, Favorite, Editor
 
 # Create your views here.
 def index(request):
@@ -42,12 +44,36 @@ def index(request):
     print(categories)
     print(most_recent)
     print(other_articles)
+    
+    if request.user.is_authenticated:
+        try:
+            editors = Editor.objects.all()
 
-    return render(request, "index.html", {
-        "categories": categories,
-        "most_recent" : most_recent, 
-        "other_articles": other_articles
-    })
+        except Editor.DoesNotExist:
+            raise Http404("Editors not found.")
+        
+        print(editors)
+
+        check_editor = False
+        
+        for editor in editors:
+            if request.user == editor.member:
+                check_editor = True
+
+        return render(request, "index.html", {
+            "categories": categories,
+            "most_recent" : most_recent, 
+            "other_articles": other_articles,
+            "check_editor": check_editor
+        })
+    
+    else:
+
+        return render(request, "index.html", {
+            "categories": categories,
+            "most_recent" : most_recent, 
+            "other_articles": other_articles,
+        })
 
 def login_view(request):
     if request.method == "POST":
@@ -126,12 +152,34 @@ def profile(request, username):
         print(favorites)
 
         print(user_profile)
+        
+        if request.user.is_authenticated:
+            try:
+                editors = Editor.objects.all()
 
-        return render(request, "profile.html", {
-            "user_profile": user_profile,
-            "articles": articles,
-            "favorites": favorites
-        })
+            except Editor.DoesNotExist:
+                raise Http404("Editors not found.")
+
+            check_editor = False
+            
+            for editor in editors:
+                if request.user == editor.member:
+                    check_editor = True
+
+            return render(request, "profile.html", {
+                "user_profile": user_profile,
+                "articles": articles,
+                "favorites": favorites,
+                "check_editor": check_editor
+            })
+        
+        else:
+
+            return render(request, "profile.html", {
+                "user_profile": user_profile,
+                "articles": articles,
+                "favorites": favorites
+            })
     
 @login_required
 def edit_profile(request, username):
@@ -231,6 +279,12 @@ def create_article(request):
         user = request.user
 
         try:
+            staff = Editor.objects.get(member=user)
+
+        except User.DoesNotExist:
+            raise Http404("Not a member of staff")
+
+        try:
             categories = Category.objects.all()
 
         except Category.DoesNotExist:
@@ -260,7 +314,7 @@ def create_article(request):
                 "message": "Article has been published with same title already!"
             })
         
-        else:
+        elif staff:
             try:
                 article = Article.objects.create(article_title=article_title, article_content=article_content, category=category, author=author, banner_image=image_URL)
                 article.save()
@@ -274,6 +328,13 @@ def create_article(request):
             print(article)
             
             return HttpResponseRedirect(reverse("single_post", args=[article_title]))
+        
+        else:
+            
+            return render(request, "create_article.html", {
+                "categories": categories,
+                "message": "Not a member of staff"
+            })
         
 def single_post(request, article_title):
 

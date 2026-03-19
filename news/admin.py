@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Category, Article, Comment, Avatar, Favorite
+from .models import User, Category, Article, Comment, Avatar, Favorite, Editor
 
 # Register your models here.
 admin.site.register(User, UserAdmin)
@@ -14,3 +14,5 @@ admin.site.register(Comment)
 admin.site.register(Avatar)
 
 admin.site.register(Favorite)
+
+admin.site.register(Editor)

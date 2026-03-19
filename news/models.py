@@ -23,6 +23,11 @@ class User(AbstractUser):
     def __str__(self):
         return f"Username: {self.username}, First Name: {self.first_name}, Last Name: {self.last_name} Bio is {self.bio}, avatar_image: {self.avatar_image}"
     
+class Editor(models.Model):
+    name = models.CharField(default="Editorial Staff", max_length=128)
+    member = models.ForeignKey(User, on_delete=models.CASCADE, related_name="staff_member")
+    date_joined = models.DateTimeField(auto_now_add=True)
+    
 class Category(models.Model):
     # category = models.CharField(max_length=255, default="World", unique=True)
     WORLD = "WRL"
@@ -68,6 +73,11 @@ class Article(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="categories")
     banner_image = models.URLField()
+
+    class Meta:
+        permissions = [
+            ("publish_article", "Can publish article")
+        ]
 
     def __str__(self):
         return f"{self.author} wrote article: {self.article_content} in {self.category} at {self.timestamp} with banner URL: {self.banner_image}"
