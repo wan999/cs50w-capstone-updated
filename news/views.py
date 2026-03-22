@@ -153,33 +153,24 @@ def profile(request, username):
 
         print(user_profile)
         
-        if request.user.is_authenticated:
-            try:
-                editors = Editor.objects.all()
+        try:
+            editors = Editor.objects.all()
 
-            except Editor.DoesNotExist:
-                raise Http404("Editors not found.")
+        except Editor.DoesNotExist:
+            raise Http404("Editors not found.")
 
-            check_editor = False
-            
-            for editor in editors:
-                if request.user == editor.member:
-                    check_editor = True
-
-            return render(request, "profile.html", {
-                "user_profile": user_profile,
-                "articles": articles,
-                "favorites": favorites,
-                "check_editor": check_editor
-            })
+        check_editor = False
         
-        else:
+        for editor in editors:
+            if user_profile == editor.member:
+                check_editor = True
 
-            return render(request, "profile.html", {
-                "user_profile": user_profile,
-                "articles": articles,
-                "favorites": favorites
-            })
+        return render(request, "profile.html", {
+            "user_profile": user_profile,
+            "articles": articles,
+            "favorites": favorites,
+            "check_editor": check_editor
+        })
     
 @login_required
 def edit_profile(request, username):
@@ -467,80 +458,98 @@ def add_comment(request, article_id):
 @login_required
 def add_to_favorites(request, article_id):
 
-    user = request.user
+    if request.user.is_authenticated:
 
-    try:
-        user_profile = User.objects.get(username=user.username)
-
-    except User.DoesNotExist:
-        raise Http404("User not found.")
-    
-    try:
-        article = Article.objects.get(id=article_id)
-
-    except Article.DoesNotExist:
-        raise Http404("Article not found.")
-    
-    favorite_instance = Favorite.objects.create(article_favorited=article, user_that_favorited=user_profile)
-    
-    print(favorite_instance)
-
-    return HttpResponseRedirect(reverse("profile", args=[user.username]))
-
-
-@login_required    
-def view_favorites(request):
-
-    user = request.user
-
-    if request.method == "GET":
+        user = request.user
 
         try:
             user_profile = User.objects.get(username=user.username)
 
         except User.DoesNotExist:
             raise Http404("User not found.")
+        
+        try:
+            article = Article.objects.get(id=article_id)
+
+        except Article.DoesNotExist:
+            raise Http404("Article not found.")
+        
+        if Favorite.objects.filter(article_favorited=article, user_that_favorited=user_profile).exists():
+
+            try:
+                other_articles = Article.objects.all().exclude(article_title=article.article_title)
+
+            except Article.DoesNotExist:
+                raise Http404("Other articles not found.")
             
-        favorites = Favorite.objects.filter(user_that_favorited=user_profile.id).order_by('-timestamp')
+            comments = Comment.objects.filter(article_commented_on=article).order_by('-timestamp')
 
-        print(user_profile)
+            if comments:
+                return render(request, "single-post.html", {
+                    "message": "Already Favorited!",
+                    "article": article,
+                    "other_articles" : other_articles,
+                    "comments": comments
+                })
+            else:
+                return render(request, "single-post.html", {
+                    "message": "Already Favorited!",
+                    "article": article,
+                    "other_articles" : other_articles
+                })
+        
+        else:
+        
+            favorite_instance = Favorite.objects.create(article_favorited=article, user_that_favorited=user_profile)
+            
+            print(favorite_instance)
 
-        return render(request, "profile.html", {
-            "user_profile": user_profile,
-            "favorites": favorites
+            return HttpResponseRedirect(reverse("profile", args=[user.username]))
+    
+    else:
+        return render(request, "login.html", {
+            "message": "Login to favorite article!"
         })
+
     
 @login_required    
 def delete_favorite(request, article_title):
 
-    user = request.user
+    if request.user.is_authenticated:
 
-    if request.method == "POST":
+        user = request.user
 
-        try:
-            article = Article.objects.get(article_title=article_title)
-        
-        except Article.DoesNotExist:    
-            raise Http404("Article not found.")
+        if request.method == "POST":
 
-        try:
-            favorite = Favorite.objects.get(article_favorited=article)
+            try:
+                article = Article.objects.get(article_title=article_title)
+            
+            except Article.DoesNotExist:    
+                raise Http404("Article not found.")
 
-        except Favorite.DoesNotExist:
-            raise Http404("Favorite not found.")
-        
-        username = favorite.user_that_favorited.username
-        print(username)
+            try:
+                favorite = Favorite.objects.get(article_favorited=article, user_that_favorited=user)
 
-        if (username == user.username):
-        
-            favorite.delete()
-        
-            return HttpResponseRedirect(reverse("profile", args=[username]))
-        
-        else:
-            return render(request, "profile.html", {
-                "message": "You cannot delete someone else's favorited article!"
-            })
+            except Favorite.DoesNotExist:
+                raise Http404("Favorite not found.")
+            
+            username = favorite.user_that_favorited.username
+            print(username)
+
+            if (username == user.username):
+            
+                favorite.delete()
+            
+                return HttpResponseRedirect(reverse("profile", args=[username]))
+            
+            else:
+                return render(request, "profile.html", {
+                    "message": "You cannot delete someone else's favorited article!"
+                })
+            
+    else:
+        return render(request, "login.html", {
+            "message": "Login to favorite article"
+        })
 
     

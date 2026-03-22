@@ -46,12 +46,12 @@
                                     <img class="card-img-right flex-auto d-md-block" src="{{ article.banner_image }}" alt="{{ article_title }}" style="max-height:400px; width: auto;">
                                 </div>
                             {% endfor %}
-                            {% else %}
-                                <div class="card flex-md-row mb-4 box-shadow">
-                                    <div class="card-body d-flex flex-column align-items-start">
-                                        <p class="d-inline-block card-text">User Has No Published Articles Yet.</p>
-                                    </div>
+                        {% else %}
+                            <div class="card flex-md-row mb-4 box-shadow">
+                                <div class="card-body d-flex flex-column align-items-start">
+                                    <p class="d-inline-block card-text">User Has No Published Articles Yet.</p>
                                 </div>
+                            </div>
                         {% endif %}
                     {% endif %}
                     <h3>Favorited Articles</h3>
@@ -59,10 +59,12 @@
                         {% for favorite in favorites %}
                             <div class="card flex-md-row mb-4 box-shadow h-md-250">
                                 <div class="card-body d-flex flex-column align-items-start">
-                                <form action="{% url 'delete_favorite' favorite.article_favorited.article_title %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="submit" class="btn btn-sm btn-outline-danger mb-3" value="DELETE">
-                                </form>
+                                    {% if user_profile.username == request.user.username %}
+                                        <form action="{% url 'delete_favorite' favorite.article_favorited.article_title %}" method="post">
+                                            {% csrf_token %}
+                                            <input type="submit" class="btn btn-sm btn-outline-danger mb-3" value="DELETE">
+                                        </form>
+                                    {% endif %}
                                 <strong class="d-inline-block mb-2 text-primary">{{ favorite.article_favorited.category }}</strong>
                                 <h3 class="mb-0">
                                     <a class="text-dark" href="{% url 'single_post' favorite.article_favorited.article_title %}">{{ favorite.article_favorited.article_title }}</a>
@@ -74,12 +76,12 @@
                                 <img class="card-img-right flex-auto d-md-block" src="{{ favorite.article_favorited.banner_image }}" alt="{{ favorite.article_favorited.article_title }}" style="max-height:400px; width: auto;">
                             </div>
                         {% endfor %}
-                        {% else %}
-                            <div class="card flex-md-row mb-4 box-shadow">
-                                <div class="card-body d-flex flex-column align-items-start">
-                                    <p class="d-inline-block card-text">User Has No Favorited Articles Yet.</p>
-                                </div>
+                    {% else %}
+                        <div class="card flex-md-row mb-4 box-shadow">
+                            <div class="card-body d-flex flex-column align-items-start">
+                                <p class="d-inline-block card-text">User Has No Favorited Articles Yet.</p>
                             </div>
+                        </div>
                     {% endif %}
                 </div>
                 <aside class="col-md-4 blog-sidebar">

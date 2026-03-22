@@ -26,6 +26,11 @@
     </div>
 
     <div class="container">
+
+      {% if message %}
+        <div class="alert alert-danger mt-3" role="alert">{{ message }}</div>
+      {% endif %}
+
       <h3 class="pb-3 mb-4 font-italic border-bottom mt-2">
         {{ article.category }}
       </h3>

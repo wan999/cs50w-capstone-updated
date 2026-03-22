@@ -18,6 +18,5 @@ urlpatterns = [
     path("category/<str:category>", views.filter_articles, name="filter_articles"),
     path("<int:article_id>/comments", views.add_comment, name="add_comment"),
     path("<int:article_id>/add_to_favorites", views.add_to_favorites, name="add_to_favorites"),
-    path("<str:username>/favorites", views.view_favorites, name="view_favorites"),
     path("<str:article_title>/delete_favorite", views.delete_favorite, name="delete_favorite"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
