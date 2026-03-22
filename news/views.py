@@ -227,9 +227,6 @@ def edit_profile(request, username):
                 except Avatar.DoesNotExist:
                     raise Http404("Image corrupted.")
 
-            else:
-                return HttpResponseRedirect(reverse("profile", args=[username]))
-
         except User.DoesNotExist:
             raise Http404("User not found.")
 
